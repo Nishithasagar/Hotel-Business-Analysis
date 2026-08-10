@@ -299,6 +299,58 @@ def show_insight(text):
 def overview_page():
     st.header("📌 Project Overview")
 
+    # ========================================================
+    # KPI SUMMARY — RESPONDS TO DASHBOARD FILTERS
+    # ========================================================
+    st.markdown("### 📊 Dashboard KPIs")
+
+    if filtered_df.empty:
+        st.warning("No bookings match the selected filters.")
+        return
+
+    total_bookings = len(filtered_df)
+    cancellation_rate = filtered_df["is_canceled"].mean() * 100
+    avg_lead_time = filtered_df["lead_time"].mean()
+    avg_adr = filtered_df["adr"].mean()
+    city_share = (filtered_df["hotel"].eq("City Hotel").mean()) * 100
+
+    kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
+
+    kpi1.metric(
+        "Total Bookings",
+        f"{total_bookings:,}"
+    )
+
+    kpi2.metric(
+        "Cancellation Rate",
+        f"{cancellation_rate:.1f}%"
+    )
+
+    kpi3.metric(
+        "Average Lead Time",
+        f"{avg_lead_time:.0f} days"
+    )
+
+    kpi4.metric(
+        "Average ADR",
+        f"{avg_adr:.2f}"
+    )
+
+    kpi5.metric(
+        "City Hotel Share",
+        f"{city_share:.1f}%"
+    )
+
+    if selected_hotel == "All" and selected_year == "All":
+        st.caption("KPIs are calculated for all cleaned bookings.")
+    else:
+        hotel_label = selected_hotel
+        year_label = selected_year
+        st.caption(
+            f"Current selection: Hotel Type = {hotel_label} | "
+            f"Arrival Year = {year_label}"
+        )
+
     st.markdown("### Business Problem")
     st.write(
         "The objective of this project is to analyze hotel booking "
