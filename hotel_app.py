@@ -245,59 +245,6 @@ df = load_data()
 
 
 # ============================================================
-# SIDEBAR
-# ============================================================
-
-st.sidebar.markdown(
-    """
-    <div class="sidebar-project-title">
-        🏨 Hotel Business Analysis
-    </div>
-
-    <div class="sidebar-item">
-        <span class="sidebar-label">Dataset:</span><br>
-        Hotel Booking Dataset
-    </div>
-
-    <div class="sidebar-item">
-        <span class="sidebar-label">Analysis:</span><br>
-        Booking & Cancellation Analysis
-    </div>
-
-    <div class="sidebar-divider"></div>
-    """,
-    unsafe_allow_html=True
-)
-
-st.sidebar.markdown(
-    '<div class="sidebar-section-title">🔎 Dashboard Filters</div>',
-    unsafe_allow_html=True
-)
-
-hotel_options = ["All"] + sorted(df["hotel"].dropna().unique().tolist())
-selected_hotel = st.sidebar.selectbox(
-    "🏨 Hotel Type",
-    hotel_options
-)
-
-year_options = ["All"] + sorted(df["arrival_date_year"].unique().tolist())
-selected_year = st.sidebar.selectbox(
-    "📅 Arrival Year",
-    year_options
-)
-
-filtered_df = df.copy()
-
-if selected_hotel != "All":
-    filtered_df = filtered_df[
-        filtered_df["hotel"] == selected_hotel
-    ]
-
-if selected_year != "All":
-    filtered_df = filtered_df[
-        filtered_df["arrival_date_year"] == selected_year
-    ]
-
 month_order = [
     "January", "February", "March", "April",
     "May", "June", "July", "August",
@@ -1006,45 +953,165 @@ def recommendations_page():
 
 
 # ============================================================
-# NAVIGATION — PAGES INSTEAD OF TABS
+# SIDEBAR — PROJECT INFORMATION, NAVIGATION & FILTERS
 # ============================================================
 
+st.sidebar.markdown(
+    """
+    <div class="sidebar-project-title">
+        🏨 Hotel Business Analysis
+    </div>
+
+    <div class="sidebar-item">
+        <span class="sidebar-label">Dataset:</span><br>
+        Hotel Booking Dataset
+    </div>
+
+    <div class="sidebar-item">
+        <span class="sidebar-label">Analysis:</span><br>
+        Booking & Cancellation Analysis
+    </div>
+
+    <div class="sidebar-divider"></div>
+    """,
+    unsafe_allow_html=True
+)
+
+# ------------------------------------------------------------
+# PAGE OBJECTS
+# ------------------------------------------------------------
+
+overview_pg = st.Page(
+    overview_page,
+    title="Overview",
+    icon="📌",
+    url_path="overview"
+)
+
+data_prep_pg = st.Page(
+    data_preparation_page,
+    title="Data Preparation",
+    icon="🧹",
+    url_path="data-preparation"
+)
+
+eda_pg = st.Page(
+    eda_page,
+    title="EDA",
+    icon="🔍",
+    url_path="eda"
+)
+
+findings_pg = st.Page(
+    findings_page,
+    title="Key Findings",
+    icon="💡",
+    url_path="key-findings"
+)
+
+recommendations_pg = st.Page(
+    recommendations_page,
+    title="Business Recommendations",
+    icon="💼",
+    url_path="business-recommendations"
+)
+
 pages = {
-    "Project": [
-        st.Page(
-            overview_page,
-            title="Overview",
-            icon="📌",
-            url_path="overview"
-        ),
-        st.Page(
-            data_preparation_page,
-            title="Data Preparation",
-            icon="🧹",
-            url_path="data-preparation"
-        ),
-    ],
-    "Analysis": [
-        st.Page(
-            eda_page,
-            title="EDA",
-            icon="🔍",
-            url_path="eda"
-        ),
-        st.Page(
-            findings_page,
-            title="Key Findings",
-            icon="💡",
-            url_path="key-findings"
-        ),
-        st.Page(
-            recommendations_page,
-            title="Business Recommendations",
-            icon="💼",
-            url_path="business-recommendations"
-        ),
-    ],
+    "Project": [overview_pg, data_prep_pg],
+    "Analysis": [eda_pg, findings_pg, recommendations_pg],
 }
 
-selected_page = st.navigation(pages)
+# Hide Streamlit's automatic navigation.
+selected_page = st.navigation(pages, position="hidden")
+
+# ------------------------------------------------------------
+# CUSTOM SIDEBAR NAVIGATION
+# ------------------------------------------------------------
+
+st.sidebar.markdown(
+    '<div class="sidebar-section-title">📍 Project</div>',
+    unsafe_allow_html=True
+)
+
+st.sidebar.page_link(
+    overview_pg,
+    label="Overview",
+    icon="📌"
+)
+
+st.sidebar.page_link(
+    data_prep_pg,
+    label="Data Preparation",
+    icon="🧹"
+)
+
+st.sidebar.markdown(
+    '<div class="sidebar-section-title">📊 Analysis</div>',
+    unsafe_allow_html=True
+)
+
+st.sidebar.page_link(
+    eda_pg,
+    label="EDA",
+    icon="🔍"
+)
+
+st.sidebar.page_link(
+    findings_pg,
+    label="Key Findings",
+    icon="💡"
+)
+
+st.sidebar.page_link(
+    recommendations_pg,
+    label="Business Recommendations",
+    icon="💼"
+)
+
+# ------------------------------------------------------------
+# DASHBOARD FILTERS
+# ------------------------------------------------------------
+
+st.sidebar.markdown(
+    '<div class="sidebar-divider"></div>',
+    unsafe_allow_html=True
+)
+
+st.sidebar.markdown(
+    '<div class="sidebar-section-title">🔎 Dashboard Filters</div>',
+    unsafe_allow_html=True
+)
+
+hotel_options = ["All"] + sorted(
+    df["hotel"].dropna().unique().tolist()
+)
+
+selected_hotel = st.sidebar.selectbox(
+    "🏨 Hotel Type",
+    hotel_options
+)
+
+year_options = ["All"] + sorted(
+    df["arrival_date_year"].unique().tolist()
+)
+
+selected_year = st.sidebar.selectbox(
+    "📅 Arrival Year",
+    year_options
+)
+
+filtered_df = df.copy()
+
+if selected_hotel != "All":
+    filtered_df = filtered_df[
+        filtered_df["hotel"] == selected_hotel
+    ]
+
+if selected_year != "All":
+    filtered_df = filtered_df[
+        filtered_df["arrival_date_year"] == selected_year
+    ]
+
+# Run the selected page only after filters have been prepared.
 selected_page.run()
+
